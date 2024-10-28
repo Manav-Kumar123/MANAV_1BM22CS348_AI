@@ -1,0 +1,118 @@
+Enter the initial positions for 4 queens (0 to 3, space-separated): 3 1 2 0
+Initial State:
+. . . Q
+. Q . .
+. . Q .
+Q . . .
+
+Initial Heuristic (Conflicts): 2
+
+Evaluating Neighbor:
+. Q . .
+. . . Q
+. . Q .
+Q . . .
+
+Heuristic (Conflicts): 1
+Evaluating Neighbor:
+. . Q .
+. Q . .
+. . . Q
+Q . . .
+
+Heuristic (Conflicts): 1
+Evaluating Neighbor:
+Q . . .
+. Q . .
+. . Q .
+. . . Q
+
+Heuristic (Conflicts): 6
+Evaluating Neighbor:
+. . . Q
+. . Q .
+. Q . .
+Q . . .
+
+Heuristic (Conflicts): 6
+Evaluating Neighbor:
+. . . Q
+Q . . .
+. . Q .
+. Q . .
+
+Heuristic (Conflicts): 1
+Evaluating Neighbor:
+. . . Q
+. Q . .
+Q . . .
+. . Q .
+
+Heuristic (Conflicts): 1
+Moving to Next State:
+. Q . .
+. . . Q
+. . Q .
+Q . . .
+
+Heuristic (Conflicts): 1
+
+Evaluating Neighbor:
+. . . Q
+. Q . .
+. . Q .
+Q . . .
+
+Heuristic (Conflicts): 2
+Evaluating Neighbor:
+. . Q .
+. . . Q
+. Q . .
+Q . . .
+
+Heuristic (Conflicts): 2
+Evaluating Neighbor:
+Q . . .
+. . . Q
+. . Q .
+. Q . .
+
+Heuristic (Conflicts): 4
+Evaluating Neighbor:
+. Q . .
+. . Q .
+. . . Q
+Q . . .
+
+Heuristic (Conflicts): 4
+Evaluating Neighbor:
+. Q . .
+Q . . .
+. . Q .
+. . . Q
+
+Heuristic (Conflicts): 2
+Evaluating Neighbor:
+. Q . .
+. . . Q
+Q . . .
+. . Q .
+
+Heuristic (Conflicts): 0
+Moving to Next State:
+. Q . .
+. . . Q
+Q . . .
+. . Q .
+
+Heuristic (Conflicts): 0
+
+Best Solution Found:
+. Q . .
+. . . Q
+Q . . .
+. . Q .
+
+Final Heuristic (Conflicts): 0
+
+=== Code Execution Successful ===
