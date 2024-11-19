@@ -1,0 +1,96 @@
+//Supported Lines
+//"John is a human."
+//"Every human is mortal."
+//"John loves Mary."
+//"All dogs are animals."
+//"Some dogs are brown."
+//"There is someone who loves Mary."
+//"Mary is the mother of John."
+//"If it is raining, then the ground is wet."
+//"John and Mary are both students."
+//"No one is both a teacher and a student."
+//"Nobody is taller than themselves."
+-------------------------------------------------------------------------------------------------------------------------------
+CODE
+
+# Function to dynamically transform sentences into FOL
+def sentence_to_fol(sentence):
+    sentence = sentence.lower().strip()
+    
+    if "is a human" in sentence:
+        subject = sentence.split(" is a human")[0]
+        return f"H({subject[0]})"  # Use the first letter of the subject as a variable
+
+    elif "is mortal" in sentence:
+        subject = sentence.split(" is mortal")[0]
+        return f"M({subject[0]})"
+
+    elif "loves" in sentence:
+        parts = sentence.split(" loves ")
+        subject = parts[0]
+        object_ = parts[1].replace(".", "")
+        return f"L({subject[0]}, {object_[0]})"
+
+    elif "all" in sentence and "are" in sentence:
+        parts = sentence.replace("all ", "").split(" are ")
+        subject_class = parts[0]
+        object_class = parts[1].replace(".", "")
+        return f"∀x({subject_class[0].upper()}(x) → {object_class[0].upper()}(x))"
+
+    elif "some" in sentence and "are" in sentence:
+        parts = sentence.replace("some ", "").split(" are ")
+        subject_class = parts[0]
+        object_class = parts[1].replace(".", "")
+        return f"∃x({subject_class[0].upper()}(x) ∧ {object_class[0].upper()}(x))"
+
+    elif "there is someone who" in sentence:
+        action = sentence.replace("there is someone who ", "").strip().replace(".", "")
+        if "loves" in action:
+            parts = action.split(" loves ")
+            object_ = parts[1]
+            return f"∃x(L(x, {object_[0]}))"
+
+    elif "is the mother of" in sentence:
+        parts = sentence.split(" is the mother of ")
+        subject = parts[0]
+        object_ = parts[1].replace(".", "")
+        return f"M({subject[0]}, {object_[0]})"
+
+    elif "if" in sentence and "then" in sentence:
+        parts = sentence.split(", then ")
+        condition = parts[0].replace("if ", "").strip()
+        conclusion = parts[1].strip().replace(".", "")
+        return f"({condition[0].upper()} → {conclusion[0].upper()})"
+
+    elif "and" in sentence:
+        parts = sentence.split(" and ")
+        subjects = [p.strip().replace(".", "") for p in parts]
+        return f"({' ∧ '.join([s[0].upper() for s in subjects])})"
+
+    elif "no one is both" in sentence:
+        qualities = sentence.replace("no one is both ", "").strip().replace(".", "").split(" and ")
+        return f"¬∃x({qualities[0][0].upper()}(x) ∧ {qualities[1][0].upper()}(x))"
+
+    elif "nobody is taller than themselves" in sentence:
+        return "¬∃x(T(x, x))"
+
+    else:
+        return "Translation rule not found for this sentence."
+
+# Main program
+def main():
+    print("Welcome to the Dynamic Natural Language to FOL Converter!")
+    print("\nType a simple sentence to get its FOL translation or type 'exit' to quit.")
+
+    while True:
+        user_input = input("\nEnter a sentence: ").strip()
+        if user_input.lower() == 'exit':
+            print("Exiting the converter. Goodbye!")
+            break
+
+        translation = sentence_to_fol(user_input)
+        print(f"FOL Translation: {translation}")
+
+# Run the program
+if __name__ == "__main__":
+    main()
