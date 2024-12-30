@@ -1,0 +1,103 @@
+
+def is_variable(term):
+    """Check if the term is a variable."""
+    return isinstance(term, str) and term.islower() and len(term) == 1
+
+
+def occurs_check(var, term):
+    """Check if a variable occurs in a term."""
+    if var == term:
+        return True
+    if isinstance(term, tuple):  # For compound terms
+        return any(occurs_check(var, sub_term) for sub_term in term[1:])
+    return False
+
+
+def unify(psi1, psi2, subst=None):
+    """Unify two terms psi1 and psi2."""
+    if subst is None:
+        subst = {}
+
+    # Step 1(a): If psi1 and psi2 are identical, return the current substitution
+    if psi1 == psi2:
+        return subst
+
+    # Step 1(b): If psi1 is a variable
+    if is_variable(psi1):
+        return unify_variable(psi1, psi2, subst)
+
+    # Step 1(c): If psi2 is a variable
+    if is_variable(psi2):
+        return unify_variable(psi2, psi1, subst)
+
+    # Step 2: If psi1 and psi2 are compound terms with different predicates, return FAILURE
+    if isinstance(psi1, tuple) and isinstance(psi2, tuple):
+        if psi1[0] != psi2[0]:  # Different predicates
+            return None
+
+        # Step 3: If psi1 and psi2 have different numbers of arguments, return FAILURE
+        if len(psi1) != len(psi2):
+            return None
+
+        # Step 4: Recursively unify arguments
+        for arg1, arg2 in zip(psi1[1:], psi2[1:]):
+            subst = unify(arg1, arg2, subst)
+            if subst is None:  # Step 5(b)
+                return None
+        return subst
+
+    # If none of the above conditions match, return FAILURE
+    return None
+
+
+def unify_variable(var, term, subst):
+    """Unify a variable with a term."""
+    if var in subst:  # If var is already substituted, unify recursively
+        return unify(subst[var], term, subst)
+    elif isinstance(term, str) and term in subst:  # If term is substituted
+        return unify(var, subst[term], subst)
+    elif occurs_check(var, term):  # Occurs check to avoid infinite recursion
+        return None
+    else:  # Add to substitution set
+        subst[var] = term
+        return subst
+
+
+# Example usage
+def parse_term(term_str):
+    """
+    Parse a string representation of a term into a tuple or variable.
+    For example:
+        "f(x, y)" -> ("f", "x", "y")
+        "x" -> "x"
+    """
+    term_str = term_str.strip()
+    if "(" in term_str and term_str.endswith(")"):
+        predicate = term_str[:term_str.index("(")]
+        arguments = term_str[term_str.index("(") + 1:-1].split(",")
+        return (predicate,) + tuple(arg.strip() for arg in arguments)
+    return term_str  # It's a variable or constant
+
+
+psi1 = input("Enter Ψ1: ").strip()
+psi2 = input("Enter Ψ2: ").strip()
+
+# Parse input terms into structured representations
+term1 = parse_term(psi1)
+term2 = parse_term(psi2)
+
+result = unify(term1, term2)
+if result is not None:
+    print("Unification Successful!")
+    print("Substitutions:")
+    for var, value in result.items():
+        print(f"{var} -> {value}")
+else:
+    print("Unification Failed!")
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Unification Successful!
+Substitutions:
+x -> 'Richard'
+y -> 'John'
+ 
