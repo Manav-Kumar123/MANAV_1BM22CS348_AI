@@ -1,0 +1,112 @@
+
+def is_variable(term):
+    return term.islower() and "(" not in term and ")" not in term
+
+def unify_literal(lit1, lit2):
+    """Unify two literals if possible, returning a substitution map or None."""
+    if lit1 == lit2:
+        return {}
+
+    if "(" in lit1 and "(" in lit2:
+        pred1, args1 = lit1.split("(")
+        pred2, args2 = lit2.split("(")
+        if pred1 != pred2:
+            return None
+        args1 = args1[:-1].split(",")
+        args2 = args2[:-1].split(",")
+        subst = {}
+        for a1, a2 in zip(args1, args2):
+            if a1 != a2:
+                if is_variable(a1):
+                    subst[a1] = a2
+                elif is_variable(a2):
+                    subst[a2] = a1
+                else:
+                    return None
+        return subst
+
+    if is_variable(lit1):
+        return {lit1: lit2}
+    if is_variable(lit2):
+        return {lit2: lit1}
+    return None
+
+
+def apply_substitution(clause, substitution):
+    """Apply a substitution to a clause."""
+    new_literals = []
+    for lit in clause.literals:
+        for var, const in substitution.items():
+            lit = lit.replace(var, const)
+        new_literals.append(lit)
+    return Clause(new_literals)
+
+
+class Clause:
+    def __init__(self, literals):
+        self.literals = set(literals)
+
+    def __repr__(self):
+        return " ∨ ".join(sorted(self.literals))
+
+    def resolve(self, other):
+        resolvents = []
+        for literal in self.literals:
+            for other_literal in other.literals:
+                unifier = unify_literal(literal, f"¬{other_literal}" if not other_literal.startswith("¬") else other_literal[1:])
+                if unifier is not None:
+                    new_clause = Clause((self.literals - {literal}) | (other.literals - {other_literal}))
+                    resolvents.append(apply_substitution(new_clause, unifier))
+        return resolvents
+
+
+def resolution(clauses, query):
+    negated_query = Clause([f"¬{query}"])
+    clauses.append(negated_query)
+
+    new = set()
+    seen_pairs = set()
+
+    while True:
+        pairs = [(clauses[i], clauses[j]) for i in range(len(clauses)) for j in range(i + 1, len(clauses))]
+        for ci, cj in pairs:
+            if (ci, cj) in seen_pairs or (cj, ci) in seen_pairs:
+                continue
+            seen_pairs.add((ci, cj))
+
+            resolvents = ci.resolve(cj)
+            for resolvent in resolvents:
+                if not resolvent.literals:
+                    return True
+                new.add(frozenset(resolvent.literals))
+
+        if new.issubset(set(map(frozenset, (c.literals for c in clauses)))):
+            return False
+        clauses.extend(Clause(list(literals)) for literals in new - set(map(frozenset, (c.literals for c in clauses))))
+        new.clear()
+
+
+# Knowledge Base (KB)
+KB = [
+    Clause(["¬food(x)", "likes(john, x)"]),
+    Clause(["food(apple)"]),
+    Clause(["food(vegetables)"]),
+    Clause(["¬eats(y, z)", "killed(y)", "food(z)"]),
+    Clause(["eats(anil, peanuts)"]),
+    Clause(["alive(anil)"]),
+    Clause(["¬eats(anil, w)", "eats(harry, w)"]),
+    Clause(["killed(g)", "alive(g)"]),
+    Clause(["¬alive(k)", "¬killed(k)"]),
+]
+
+# Query: Prove John likes peanuts
+query = "likes(john, peanuts)"
+
+if resolution(KB, query):
+    print(f"The conclusion '{query}' is proven by resolution.")
+else:
+    print(f"The conclusion '{query}' cannot be proven.")
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+The conclusion 'likes(john, peanuts)' is proven by resolution.
+ 
