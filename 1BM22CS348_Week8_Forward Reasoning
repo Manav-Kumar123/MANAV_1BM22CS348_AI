@@ -1,0 +1,78 @@
+
+# Define the Fact class
+class Fact:
+    def __init__(self, name, *args):
+        self.name = name
+        self.args = args
+
+    def __str__(self):
+        return f"{self.name}({', '.join(map(str, self.args))})"
+
+    def __eq__(self, other):
+        return self.name == other.name and self.args == other.args
+
+    def __hash__(self):
+        return hash((self.name, self.args))
+
+# Representing constants
+A = "A"  # Country A
+Robert = "Robert"  # Robert
+
+# Initial facts
+facts = set([
+    Fact("American", Robert),
+    Fact("Enemy", A, "America"),
+    Fact("Missile", "T1"),  # We instantiate the missile T1
+    Fact("Owns", A, "T1"),
+    Fact("Weapon", "T1"),  # Missiles are weapons
+    Fact("Sells", Robert, "T1", A),  # Robert sells missile to A
+    Fact("Hostile", A)  # A is hostile because it's an enemy of America
+])
+
+# Inference rules
+def apply_rules(facts):
+    new_facts = set()
+
+    # Rule: Missiles are weapons
+    for fact in facts:
+        if fact.name == "Missile":
+            new_facts.add(Fact("Weapon", *fact.args))
+
+    # Rule: If American(p) ∧ Weapon(q) ∧ Sells(p, q, r) ∧ Hostile(r) ⇒ Criminal(p)
+    for fact1 in facts:
+        if fact1.name == "American":
+            p = fact1.args[0]  # p is the person
+            for fact2 in facts:
+                if fact2.name == "Weapon":
+                    q = fact2.args[0]  # q is the weapon
+                    for fact3 in facts:
+                        if fact3.name == "Sells" and fact3.args[0] == p and fact3.args[1] == q:
+                            r = fact3.args[2]  # r is the country
+                            for fact4 in facts:
+                                if fact4.name == "Hostile" and fact4.args[0] == r:
+                                    new_facts.add(Fact("Criminal", p))
+
+    return new_facts
+
+# Forward chaining
+def forward_chaining(facts):
+    inferred_facts = set(facts)  # Start with the initial facts
+    while True:
+        new_facts = apply_rules(inferred_facts) - inferred_facts
+        if not new_facts:  # No new facts inferred, stop the loop
+            break
+        inferred_facts.update(new_facts)
+    return inferred_facts
+
+# Run forward chaining
+final_facts = forward_chaining(facts)
+
+# Check if "Criminal(Robert)" is in the final facts
+if Fact("Criminal", Robert) in final_facts:
+    print("Criminal(Robert)")
+else:
+    print("Not Criminal")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Criminal(Robert)
+ 
